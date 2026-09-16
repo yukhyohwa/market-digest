@@ -82,6 +82,7 @@ def send_report_email(report_path):
         td {{ border: 1px solid #dee2e6; padding: 12px; }}
         tr:nth-child(even) {{ background-color: #fcfcfc; }}
         blockquote {{ margin: 20px 0; padding: 10px 20px; border-left: 5px solid #1a73e8; background: #f0f7ff; color: #555; }}
+        img {{ width: 66.67%; max-width: 100%; height: auto; display: block; }}
         code {{ background-color: #f4f4f4; padding: 2px 4px; border-radius: 4px; font-family: 'Courier New', monospace; }}
         .footer {{ margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; font-size: 12px; color: #888; text-align: center; }}
     </style>

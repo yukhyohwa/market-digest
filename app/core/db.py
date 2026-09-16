@@ -22,38 +22,6 @@ def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # LOF Table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS lof_funds (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            fund_id TEXT,
-            fund_name TEXT,
-            price REAL,
-            nav REAL,
-            premium_rate REAL,
-            amount REAL,
-            volume REAL,
-            fund_type TEXT,
-            apply_status TEXT,
-            is_estimated_nav INTEGER,
-            date TEXT,
-            timestamp DATETIME
-        )
-    ''')
-    
-    # Simple migration for existing lof_funds table missing 'nav' column
-    try:
-        cursor.execute("SELECT nav FROM lof_funds LIMIT 1")
-    except sqlite3.OperationalError:
-        print("[DB] Adding 'nav' column to lof_funds table...")
-        cursor.execute("ALTER TABLE lof_funds ADD COLUMN nav REAL")
-        
-    try:
-        cursor.execute("SELECT is_estimated_nav FROM lof_funds LIMIT 1")
-    except sqlite3.OperationalError:
-        print("[DB] Adding 'is_estimated_nav' column to lof_funds table...")
-        cursor.execute("ALTER TABLE lof_funds ADD COLUMN is_estimated_nav INTEGER DEFAULT 0")
-    
     # Bond Issuance Table (New Bonds)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS bond_issuance (
@@ -67,29 +35,6 @@ def init_db():
             timestamp DATETIME
         )
     ''')
-    
-    # A-share Arbitrage Table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS stock_arbitrage (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            stock_id TEXT,
-            stock_name TEXT,
-            price REAL,
-            choose_price REAL,
-            yield_pct REAL,
-            type_cd TEXT,
-            descr TEXT,
-            date TEXT,
-            timestamp DATETIME
-        )
-    ''')
-    
-    # Simple migration for existing stock_arbitrage table missing 'yield_pct' column
-    try:
-        cursor.execute("SELECT yield_pct FROM stock_arbitrage LIMIT 1")
-    except sqlite3.OperationalError:
-        print("[DB] Adding 'yield_pct' column to stock_arbitrage table...")
-        cursor.execute("ALTER TABLE stock_arbitrage ADD COLUMN yield_pct REAL DEFAULT 0")
     
     # Forex Rates Table
     cursor.execute('''
@@ -135,96 +80,6 @@ def init_db():
         )
     ''')
 
-    # SPAC Arbitrage Table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS spac_arbitrage (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            symbol TEXT,
-            name TEXT,
-            ipo_date TEXT,
-            price REAL,
-            nav REAL,
-            yield REAL,
-            remaining_days INTEGER,
-            date TEXT,
-            timestamp DATETIME
-        )
-    ''')
-
-    # CEF Arbitrage Table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS cef_arbitrage (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            ticker TEXT,
-            name TEXT,
-            category TEXT,
-            sponsor TEXT,
-            price REAL,
-            nav REAL,
-            discount REAL,
-            discount_52wk_avg REAL,
-            z_score REAL,
-            avg_daily_volume REAL,
-            dist_status TEXT,
-            date TEXT,
-            timestamp DATETIME
-        )
-    ''')
-    
-    # QDII Arbitrage Table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS qdii_arbitrage (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            fund_id TEXT,
-            fund_name TEXT,
-            price REAL,
-            premium_rate REAL,
-            estimate_value REAL,
-            realtime_premium_rate REAL,
-            realtime_estimate_value REAL,
-            volume REAL,
-            amount REAL,
-            index_name TEXT,
-            apply_status TEXT,
-            market_type TEXT,
-            date TEXT,
-            timestamp DATETIME
-        )
-    ''')
-
-    # Cbond Double Low Table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS cbond_double_low (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            bond_id TEXT,
-            bond_name TEXT,
-            price REAL,
-            premium_rate REAL,
-            dblow REAL,
-            year_left REAL,
-            type TEXT,
-            date TEXT,
-            timestamp DATETIME
-        )
-    ''')
-
-    # Cbond Put-back Table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS cbond_putback (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            bond_id TEXT,
-            bond_name TEXT,
-            price REAL,
-            premium_rate REAL,
-            dblow REAL,
-            put_dt TEXT,
-            year_left REAL,
-            type TEXT,
-            date TEXT,
-            timestamp DATETIME
-        )
-    ''')
-
     # Fund OTC Limits Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS fund_otc_limits (
@@ -233,6 +88,33 @@ def init_db():
             fund_name TEXT,
             nav REAL,
             apply_status TEXT,
+            date TEXT,
+            timestamp DATETIME
+        )
+    ''')
+
+    # Important Economic Events (remaining in the current week, including today)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS economic_calendar (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_time TEXT,
+            country TEXT,
+            impact TEXT,
+            title TEXT,
+            forecast TEXT,
+            previous TEXT,
+            date TEXT,
+            timestamp DATETIME
+        )
+    ''')
+
+    # Preserve the distinction between no matching events and source failure.
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS economic_calendar_status (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ok INTEGER,
+            records INTEGER,
+            error TEXT,
             date TEXT,
             timestamp DATETIME
         )

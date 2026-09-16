@@ -24,19 +24,16 @@ The Yahoo Finance `^TNX` value is scaled by `0.1` to represent the Treasury yiel
 
 ### Fund and arbitrage monitoring
 
-- LOF and IOF premium/discount monitoring
-- QDII arbitrage opportunities
 - QDII OTC subscription-limit status monitoring through Eastmoney fund information
-- Closed-end fund (CEF) discount and opportunity screening
-- A-share cash-offer arbitrage
-- SPAC opportunity analysis
 
-Expired A-share offer periods are filtered out before they reach the report.
+### Economic calendar
+
+- High- and medium-impact CNY, USD, EUR, JPY, and GBP events
+- Remaining events in the current calendar week including today, with event times converted to China Standard Time
+- Explicit distinction between no matching events and a failed calendar source
 
 ### Bond monitoring
 
-- Convertible-bond double-low screening
-- Convertible-bond putback monitoring
 - New bond issuance tracking
 
 ### Reporting and delivery
@@ -54,20 +51,14 @@ market-digest/
 │   │   ├── market_indices.py      # Global indices and FTSE 100
 │   │   ├── forex.py               # FX rates and US 10Y Treasury yield
 │   │   ├── commodities.py         # Commodity prices
-│   │   ├── lof_funds.py            # LOF/IOF monitoring
-│   │   ├── qdii_arbitrage.py       # QDII arbitrage opportunities
+│   │   ├── economic_calendar.py   # Important events remaining this week
 │   │   ├── qdii_otc_limits.py      # Eastmoney OTC subscription status
-│   │   ├── cef_arbitrage.py        # Closed-end funds
-│   │   ├── a_share_arbitrage.py    # A-share cash-offer arbitrage
-│   │   ├── spac_arbitrage.py       # SPAC analysis
-│   │   ├── cbond_monitor.py        # Convertible bonds
 │   │   └── bond_issuance.py        # New bond issuance
 │   └── core/
 │       ├── db.py                   # Market-only SQLite schema and persistence
 │       ├── arb_reporter.py         # Market opportunity formatting
 │       ├── unified_reporter.py     # Market Markdown report generation
-│       ├── mailer.py               # Optional SMTP delivery
-│       └── jsl_session.py          # Jisilu session/client support
+│       └── mailer.py               # Optional SMTP delivery
 ├── config/
 │   └── settings.py                 # Strategy and local mail settings
 ├── data/
@@ -87,10 +78,10 @@ market-digest/
 - Windows, Linux, or macOS
 - Python 3.11 or newer recommended
 - Network access to the configured market-data providers
-- Access to Jisilu for the collectors that use Jisilu data; some pages may require an authenticated session or may enforce rate limits
+- Access to the configured public market-data endpoints; providers may enforce rate limits
 - Optional SMTP access for email delivery
 
-Dependencies are declared in `requirements.txt`. The project uses packages including `requests`, `beautifulsoup4`, `yfinance`, `curl_cffi`, `python-dotenv`, `markdown`, and OCR support used by some collectors or data-source workflows.
+Dependencies are declared in `requirements.txt`. The project uses packages including `requests`, `beautifulsoup4`, `yfinance`, `curl_cffi`, `python-dotenv`, and `markdown`.
 
 ## Installation
 
@@ -142,7 +133,7 @@ The current entry point intentionally has no `--news`, `--arb`, or unified-news 
 A normal run performs these stages:
 
 1. Initialize `data/finance_data.db`.
-2. Run the configured LOF/IOF, bond, A-share, FX, commodity, SPAC, CEF, QDII, convertible-bond, index, and OTC-limit collectors.
+2. Run the configured new-bond, FX, commodity, index, economic-calendar, and QDII OTC-limit collectors.
 3. Persist collector results in market-specific tables.
 4. Build the market report from the stored/current market data.
 5. Write the report to `output/` and charts to `output/images/`.
@@ -164,14 +155,9 @@ It contains market-specific tables such as:
 - `market_indices`
 - `forex_rates`
 - `commodities`
-- `lof_funds`
-- `qdii_arbitrage`
+- `economic_calendar`
+- `economic_calendar_status`
 - `fund_otc_limits`
-- `cef_arbitrage`
-- `stock_arbitrage`
-- `spac_arbitrage`
-- `cbond_double_low`
-- `cbond_putback`
 - `bond_issuance`
 
 The database is intentionally separate from `news-digest/data/news_data.db`. Do not point either project at the other project's database.
@@ -180,10 +166,6 @@ The database is intentionally separate from `news-digest/data/news_data.db`. Do 
 
 Strategy thresholds and local settings are maintained in `config/settings.py`. Review the configuration before changing production or scheduled runs, especially:
 
-- CEF discount and liquidity thresholds
-- QDII and LOF screening thresholds
-- Convertible-bond filters
-- A-share arbitrage yield thresholds
 - Output and email behavior
 
 ### Email configuration
@@ -208,7 +190,7 @@ The default SMTP configuration uses Gmail SMTP over SSL. Change `SMTP_SERVER` an
 
 - Yahoo Finance supplies the index and Treasury-yield series used by the report.
 - The Eastmoney fund API supplies the current QDII OTC subscription status, including fields such as `SGZT`.
-- Jisilu-based collectors may require a valid local session and can be affected by access limits.
+- Fair Economy supplies the public current-week economic calendar. Events are converted to China Standard Time and filtered from today through the end of the available week.
 - A current OTC status is compared with local history to identify changes; the collector does not reconstruct a complete historical announcement archive from Eastmoney.
 
 ## Windows automation
@@ -223,17 +205,13 @@ Arguments: main.py --mail
 Start in: C:\Users\5xgames\Desktop\github\market-digest
 ```
 
-Redirect logs to `output/` if a scheduled run needs persistent diagnostics. Ensure the scheduled account has access to the Python environment, database directory, output directory, and any required local session files.
+Redirect logs to `output/` if a scheduled run needs persistent diagnostics. Ensure the scheduled account has access to the Python environment, database directory, and output directory.
 
 ## Troubleshooting
 
 ### A collector returns no data
 
-Check network connectivity, provider availability, response changes, anti-bot protection, and authentication requirements. Run the collector from the project root so relative paths resolve correctly.
-
-### Jisilu data is unavailable
-
-Jisilu may enforce login or request limits. Treat an empty result as a data-source issue rather than assuming that no market opportunities exist. Confirm the local session configuration and retry later.
+Check network connectivity, provider availability, response changes, anti-bot protection, and request limits. Run the collector from the project root so relative paths resolve correctly.
 
 ### Yahoo Finance data is unavailable
 
@@ -242,10 +220,6 @@ Check the symbol, network access, and the installed `yfinance`/`curl_cffi` versi
 ### The Treasury yield looks ten times too high or too low
 
 The `^TNX` Yahoo value uses a different scale from a normal percentage display. The collector must retain the `0.1` conversion used by this project.
-
-### Old arbitrage opportunities remain visible
-
-Check the collector's date filtering and the timestamp of the latest successful run. A-share offers whose end date is earlier than the current date should be excluded. Do not manually edit the database unless performing a deliberate data correction.
 
 ### Email delivery fails
 

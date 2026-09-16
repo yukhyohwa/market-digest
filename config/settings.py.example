@@ -29,29 +29,7 @@ RECEIVER_EMAILS = ["your_email@gmail.com"] # 接收报告的邮箱 list
 
 # --- Strategy Configuration / 策略参数配置 ---
 STRATEGY_CONFIG = {
-    'cef': {
-        'min_discount': -8.0,
-        'max_zscore': -2.0,
-        'min_volume_usd': 500000,
+    'otc_funds': {
+        'codes': [],
     },
-    'spac': {
-        'min_yield': 0.01,
-        'min_price': 9.5,
-        'max_price': 9.99,
-    },
-    'lof': {
-        'min_premium_rate': 1.0,
-        'min_fund_share': 20000000,
-        'min_turnover': 1000000,
-    },
-    'qdii': {
-        'min_premium_rate': 1.0,
-        'min_fund_share': 20000000,
-        'min_turnover': 1000000,
-    },
-    'cbond': {
-        'max_dblow': 195.0,
-        'max_putback_price': 103.0,
-        'max_putback_years': 2.0,
-    }
 }

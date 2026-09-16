@@ -7,17 +7,12 @@ from app.core.unified_reporter import generate_unified_report
 from app.core.mailer import send_report_email
 
 # Market collectors only
-from app.collectors.lof_funds import main as run_jisilu_lof
-from app.collectors.a_share_arbitrage import main as run_a_share_arbitrage
 from app.collectors.bond_issuance import main as run_bond_issuance
 from app.collectors.forex import main as run_forex_rates
 from app.collectors.commodities import main as run_commodities
-from app.collectors.spac_arbitrage import main as run_spac_arbitrage
-from app.collectors.cef_arbitrage import main as run_cef_arbitrage
-from app.collectors.qdii_arbitrage import main as run_qdii_arbitrage
-from app.collectors.cbond_monitor import main as run_cbond_monitor
 from app.collectors.market_indices import main as run_market_indices
 from app.collectors.qdii_otc_limits import main as run_otc_limits
+from app.collectors.economic_calendar import main as run_economic_calendar
 
 
 def run_market_pipeline():
@@ -25,16 +20,11 @@ def run_market_pipeline():
     print("\n>>> Running Market Data Tasks...")
     init_db()
     tasks = [
-        ("LOF/IOF", run_jisilu_lof),
         ("Bond Issuance", run_bond_issuance),
-        ("A-share Arbitrage", run_a_share_arbitrage),
         ("Forex Rates", run_forex_rates),
         ("Commodities", run_commodities),
-        ("SPAC Arbitrage", run_spac_arbitrage),
-        ("CEF Arbitrage", run_cef_arbitrage),
-        ("QDII Arbitrage", run_qdii_arbitrage),
-        ("Cbond Monitor", run_cbond_monitor),
         ("Market Indices", run_market_indices),
+        ("Economic Calendar", run_economic_calendar),
         ("QDII OTC Limits", run_otc_limits),
     ]
     for name, task in tasks:
