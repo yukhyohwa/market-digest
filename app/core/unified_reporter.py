@@ -34,7 +34,7 @@ def generate_unified_report(include_arb=True):
         report_content += "### 1. Market Indices (Global)\n"
         indices_chart_path = os.path.join(output_dir, 'images', f'market_indices_{today}.png')
         if os.path.exists(indices_chart_path):
-            report_content += f'<img src="images/market_indices_{today}.png" alt="Market Indices 30-Day Trend" style="width:66.67%;max-width:100%;height:auto;">\n\n'
+            report_content += f'<img class="report-chart" src="images/market_indices_{today}.png" alt="Market Indices 30-Day Trend" style="width:66.67%;max-width:100%;height:auto;">\n\n'
         else:
             report_content += "*No market index data or chart available.*\n\n"
 
@@ -42,7 +42,7 @@ def generate_unified_report(include_arb=True):
         report_content += "### 2. Commodities\n"
         commodities_chart_path = os.path.join(output_dir, 'images', f'commodities_{today}.png')
         if os.path.exists(commodities_chart_path):
-            report_content += f'<img src="images/commodities_{today}.png" alt="Commodities 30-Day Trend" style="width:66.67%;max-width:100%;height:auto;">\n\n'
+            report_content += f'<img class="report-chart" src="images/commodities_{today}.png" alt="Commodities 30-Day Trend" style="width:66.67%;max-width:100%;height:auto;">\n\n'
         else:
             report_content += "*No commodities chart available.*\n\n"
 
@@ -50,7 +50,7 @@ def generate_unified_report(include_arb=True):
         report_content += "### 3. Global Forex Rates & US 10Y Treasury Yield\n"
         forex_chart_path = os.path.join(output_dir, 'images', f'forex_rates_{today}.png')
         if os.path.exists(forex_chart_path):
-            report_content += f'<img src="images/forex_rates_{today}.png" alt="Global Forex Rates and US 10Y Treasury Yield 30-Day Trend" style="width:66.67%;max-width:100%;height:auto;">\n\n'
+            report_content += f'<img class="report-chart" src="images/forex_rates_{today}.png" alt="Global Forex Rates and US 10Y Treasury Yield 30-Day Trend" style="width:66.67%;max-width:100%;height:auto;">\n\n'
         else:
             report_content += "*No forex chart available.*\n\n"
 
