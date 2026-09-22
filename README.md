@@ -28,7 +28,7 @@ The Yahoo Finance `^TNX` value is scaled by `0.1` to represent the Treasury yiel
 
 ### Economic calendar
 
-- High- and medium-impact CNY, USD, EUR, JPY, and GBP events
+- High- and medium-impact CNY, USD, JPY, and GBP events
 - Remaining events in the current calendar week including today, with event times converted to China Standard Time
 - Explicit distinction between no matching events and a failed calendar source
 

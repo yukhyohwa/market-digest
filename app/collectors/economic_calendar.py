@@ -15,7 +15,7 @@ HEADERS = {
     )
 }
 TIMEOUT = 20
-IMPORTANT_COUNTRIES = {"CNY", "USD", "EUR", "JPY", "GBP"}
+IMPORTANT_COUNTRIES = {"CNY", "USD", "JPY", "GBP"}
 IMPORTANT_IMPACTS = {"High", "Medium"}
 CHINA_TZ = timezone(timedelta(hours=8))
 
