@@ -35,23 +35,27 @@ def run_market_pipeline():
             print(f"  !!! Error in {name}: {exc}")
 
 
-def cleanup_old_images(days=30):
-    images_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", "images")
-    if not os.path.exists(images_dir):
-        return
+def cleanup_old_output(days=14):
+    """Remove files older than the retention period from output and output/images."""
+    output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
     cutoff = time.time() - days * 86400
     deleted = 0
-    for filename in os.listdir(images_dir):
-        if filename.endswith(".png"):
-            path = os.path.join(images_dir, filename)
-            if os.stat(path).st_mtime < cutoff:
-                try:
-                    os.remove(path)
-                    deleted += 1
-                except OSError as exc:
-                    print(f"Failed to delete {filename}: {exc}")
+    for directory in (output_dir, os.path.join(output_dir, "images")):
+        try:
+            with os.scandir(directory) as entries:
+                for entry in entries:
+                    try:
+                        if entry.is_file(follow_symlinks=False) and entry.stat(follow_symlinks=False).st_mtime < cutoff:
+                            os.remove(entry.path)
+                            deleted += 1
+                    except OSError as exc:
+                        print(f"[CLEANUP] Failed to delete {entry.path}: {exc}")
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            print(f"[CLEANUP] Failed to scan {directory}: {exc}")
     if deleted:
-        print(f"[CLEANUP] Deleted {deleted} old image(s).")
+        print(f"[CLEANUP] Deleted {deleted} file(s) older than {days} days.")
 
 
 def main():
@@ -63,6 +67,7 @@ def main():
     print("===========================================")
     print("=== Global Market Digest ===")
     print("===========================================")
+    cleanup_old_output()
     run_market_pipeline()
     print("\n>>> Generating Market Report...")
     report_path = generate_unified_report(include_arb=True)
@@ -73,7 +78,6 @@ def main():
             print("[SUCCESS] Email sent successfully.")
     else:
         print("[FAIL] Failed to generate report.")
-    cleanup_old_images()
     print(f"\nTotal Time: {time.time() - start_time:.2f} seconds")
 
 

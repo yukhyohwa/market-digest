@@ -126,7 +126,7 @@ Display command-line options:
 python main.py --help
 ```
 
-The current entry point intentionally has no `--news`, `--arb`, or unified-news options. It runs the market collectors, initializes the market database, generates the market report, optionally sends it, and removes market chart images older than 30 days.
+The current entry point intentionally has no `--news`, `--arb`, or unified-news options. At startup, it removes files directly inside `output/` and `output/images/` whose last modification time is more than 14 days ago. It then runs the market collectors, initializes the market database, generates the market report, and optionally sends it. Cleanup preserves directories and symbolic links; individual cleanup failures are logged without interrupting the pipeline.
 
 ## Collection pipeline
 
